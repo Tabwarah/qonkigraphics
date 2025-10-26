@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking Form with Modal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Bouncing Dots Loader */
+    .dot-wave {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+    }
+
+    .dot-wave div {
+      width: 10px;
+      height: 10px;
+      background-color: #2563eb;
+      border-radius: 50%;
+      animation: wave 1s infinite ease-in-out;
+    }
+
+    .dot-wave div:nth-child(1) { animation-delay: 0s; }
+    .dot-wave div:nth-child(2) { animation-delay: 0.15s; }
+    .dot-wave div:nth-child(3) { animation-delay: 0.3s; }
+    .dot-wave div:nth-child(4) { animation-delay: 0.45s; }
+
+    @keyframes wave {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal {
+      background: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background-color: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #2563eb;
+      animation: loadingBar 2s forwards;
+    }
+
+    @keyframes loadingBar {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+
+  <div class="max-w-4xl w-full bg-white p-8 rounded-lg shadow-xl">
+
+    <!-- Header -->
+    <div class="text-center pb-8">
+      <h3 class="text-2xl font-semibold text-blue-700 flex items-center justify-center gap-2">
+        📸 Photography Inquiry
+      </h3>
+      <p class="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in">You have any question concerning our services, 
+        please fill out your Inquiry below and we will get back to you as soon as possible.</p>
+    </div>
+
+    <!-- Hidden iframe for submission -->
+    <iframe name="hiddenFrame" style="display:none;"></iframe>
+
+    <!-- Booking Form -->
+    <form id="booking-form"
+          method="POST"
+          action="https://script.google.com/macros/s/AKfycbxFeRNjVZZ9-fvr9wB9Zkdg7sibfA_Y14ORLw2AfjpdkRs2jAZo06Te_DOBWzCw6Blb/exec"
+          target="hiddenFrame"
+          class="grid grid-cols-1 md:grid-cols-2 gap-6"
+          onsubmit="handleFormSubmit(event)">
+
+      <div class="space-y-2">
+        <label for="name" class="text-sm font-medium">Client Name *</label>
+        <input type="text" id="name" name="name" required
+        placeholder="full name"
+               class="w-full px-3 py-2 border border-blue-300 rounded-md">
+      </div>
+
+      <div class="space-y-2">
+        <label for="contact" class="text-sm font-medium">Contact Number *</label>
+        <input type="tel" id="contact" name="contact" required
+               placeholder="+254 700 000 000"
+               class="w-full px-3 py-2 border border-blue-300 rounded-md">
+      </div>
+
+      <div class="md:col-span-2">
+        <label for="email" class="text-sm font-medium">Email Address *</label>
+        <input type="email" id="email" name="email" required
+               placeholder="example@email.com"
+               class="w-full p-3 border border-blue-300 rounded-md">
+      </div>
+
+      <div class="md:col-span-2">
+        <label for="message" class="text-sm font-medium">Message</label>
+        <textarea id="message" name="message" rows="4"
+                  placeholder="Any special requirements or comments?"
+                  class="w-full p-3 border border-blue-300 rounded-md"></textarea>
+      </div>
+
+      <div class="md:col-span-2 flex justify-center mt-4">
+        <button type="submit"
+                class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">
+          Submit Inquiry
+        </button>
+      </div>
+    </form>
+
+    <!-- Modal Loader -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modalBox">
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="message" id="loaderMessage">
+          <strong>Loading...</strong><br>
+          Please wait, your request is being processed...
+        </div>
+        <div class="mt-4 space-x-2">
+          <button id="okBtn"
+                  class="hidden bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">OK</button>
+          <button id="retryBtn"
+                  class="hidden bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Try Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <p id="success-message" class="hidden text-green-600 text-center font-semibold mt-6">
+      Inquiry submitted successfully!
+    </p>
+
+    <p class="text-center text-slate-500 text-xs mt-4">* Required fields.</p>
+  </div>
+
+  <!-- JS Logic -->
+  <script>
+    function handleFormSubmit(event) {
+      event.preventDefault(); // Prevent default for handling manually
+
+      // Show modal
+      const modal = document.getElementById("modalOverlay");
+      const progressBar = document.getElementById("progressBar");
+      const loaderMsg = document.getElementById("loaderMessage");
+      const okBtn = document.getElementById("okBtn");
+      const retryBtn = document.getElementById("retryBtn");
+      const successMsg = document.getElementById("success-message");
+
+      modal.style.display = "flex";
+      progressBar.style.animation = "loadingBar 3s forwards";
+      loaderMsg.innerHTML = "<strong>Loading...</strong><br>Please wait, your request is being processed...";
+      okBtn.classList.add("hidden");
+      retryBtn.classList.add("hidden");
+      successMsg.classList.add("hidden");
+
+      // Submit the form via hidden iframe
+      document.getElementById("booking-form").submit();
+
+      // After 2.2 seconds, show OK and success
+      setTimeout(() => {
+        loaderMsg.innerHTML = "<strong>Success!</strong><br>Thank you for your inquiry!.<br>We’ll respond to you via email within 24 hours.";
+        okBtn.classList.remove("hidden");
+        document.getElementById("booking-form").reset();
+        successMsg.classList.remove("hidden");
+      }, 2200);
+
+      // OK button closes modal
+      okBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+
+      // Retry button (optional logic if needed)
+      retryBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+    }
+  </script>
+</body>
+</html>

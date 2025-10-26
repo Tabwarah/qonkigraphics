@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photography Booking</title>
+    <!-- Tailwind CSS for styling and responsiveness -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for the 'Inter' font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc;
+            padding: 1rem;
+            scroll-behavior: smooth; /* Enables smooth scrolling for all anchor links */
+        }
+        .container {
+            max-width: 1200px;
+        }
+        /* Custom styling for the filter buttons */
+        .filter-button {
+            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+            /* Changed default button color to match the blue theme */
+            @apply rounded-full px-6 py-2 font-semibold text-blue-600 bg-blue-100 shadow-md border-2 border-transparent;
+        }
+        .filter-button:hover:not(.selected) {
+            @apply bg-blue-200 border-blue-300 shadow-lg text-blue-700;
+            transform: translateY(-2px);
+        }
+        .filter-button.selected {
+            @apply bg-blue-600 text-white shadow-lg border-2 border-blue-600;
+        }
+        .photo-card {
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+        }
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .photo-card:hover img {
+            transform: scale(1.05);
+        }
+        /* A more pronounced border and subtle shadow on focus for form elements */
+        input:focus, select:focus, textarea:focus {
+            border-color: #2563eb; /* Solid blue border */
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5); /* Subtle blue glow/shadow */
+            outline: none;
+        }
+        .social-icon:hover {
+            transform: scale(1.1);
+            color: #2563eb; /* A nice blue hover color */
+        }
+        /* Background image styling for the header */
+        .header-bg {
+            background-image: url('https://images.unsplash.com/photo-1606216794074-735e91aa2c92?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            position: relative;
+        }
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+        }
+        .header-content {
+            position: relative;
+            z-index: 10;
+        }
+        /* Style for the fixed dark navigation bar */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50; /* Ensure it's above other content */
+            background-color: #0d1a29; /* Dark blue background */
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .nav-links-desktop {
+            flex-grow: 1; /* Allows this container to take up available space */
+            display: flex;
+            justify-content: center; /* Centers the links within the container */
+        }
+        .mobile-menu-container {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        .mobile-menu-container.open {
+            transform: translateX(0);
+        }
+
+
+
+
+    .icon-hover {
+      width: 32px;
+      height: 32px;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .icon-hover:hover {
+      transform: scale(1.2);
+      filter: brightness(1.3);
+    }
+/* CSS for the Animated Text Gradient */
+.animated-text-gradient {
+    /* Define a wide, vibrant gradient */
+    background-image: linear-gradient(
+        to right,
+        #ff7e5f, /* Premium Color 1: Sunset Orange */
+        #feb47b, /* Premium Color 2: Peach */
+        #86a8e7, /* Premium Color 3: Sky Blue */
+        #91e0bc, /* Premium Color 4: Mint Green */
+        #ff7e5f /* Repeat the first color to make the loop seamless */
+    );
+    /* Make the background area much wider than the text container */
+    background-size: 300% auto;
+    /* Apply the animation */
+    animation: text-flow 5s linear infinite;
+}
+
+/* Keyframes for the gradient flow animation */
+@keyframes text-flow {
+    to {
+        /* Move the background position by 300% to create the moving effect */
+        background-position: 300% center;
+    }
+}
+        
+    </style>
+    
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header Section with Background Image -->
+    <header class="header-bg flex flex-col items-center justify-start text-white p-4 sm:p-8 md:p-12">
+        <!-- Navigation Bar -->
+        <nav class="nav">
+            <div class="text-2xl font-bold tracking-tight"> 📸 QonkiGraphics</div>
+
+            <!-- Hamburger Menu for Mobile -->
+            <button id="hamburger-menu" class="md:hidden text-white focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+
+            <!-- Desktop Nav Links (hidden on mobile) -->
+            <div class="hidden md:flex space-x-8 text-sm font-semibold nav-links-desktop">
+                <a href="#" class="hover:underline">Home</a>
+                <a href="#about-section" class="hover:underline">About Us</a>
+                <a href="#photo-grid" class="hover:underline">Gallery</a>
+                <a href="#services-section" class="hover:underline">Our Services</a>
+                <a href="#services-section" class="hover:underline">Book Now</a>
+                <a href="#testimonials-section" class="hover:underline">Client Reviews</a>
+                <a href="#contact-section" class="hover:underline">Contact Us</a>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu (initially hidden) -->
+        <div id="mobile-menu" class="mobile-menu-container fixed top-0 right-0 h-full w-64 bg-slate-900 shadow-xl z-50 p-6 flex flex-col">
+            <button id="close-menu" class="self-end text-white focus:outline-none mb-6">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <nav class="flex flex-col space-y-4 text-lg font-semibold text-white">
+                <a href="#" class="hover:underline">Home</a>
+                <a href="#about-section" class="hover:underline">About Us</a>
+                <a href="#photo-grid" class="hover:underline">Gallery</a>
+                <a href="#services-section" class="hover:underline">Our Services</a>
+                <a href="#services-section" class="hover:underline">Book Now</a>
+                <a href="#testimonials-section" class="hover:underline">Client Review</a>
+                <a href="#contact-section" class="hover:underline">Contact Us</a>
+            </nav>
+ 
+        </div>
+
+        <!-- Main Header Content -->
+        <div class="header-content text-center mt-24 flex flex-col items-center justify-center">
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold mb-8 text-transparent bg-clip-text animated-text-gradient">
+        Swae Design 
+    </h3>           
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
+                Qonki Grapher
+            </h1>
+            <h2 class="text-lg sm:text-xl md:text-2xl font-semibold mb-6">
+                Capturing Moments. Creating Memories
+            </h2>
+            <p class="max-w-xl mx-auto text-sm sm:text-base mb-8">
+                Transform your special moments into timeless works of art with professional photography that tells your unique story.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="#photo-grid" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition duration-300">
+                    View Gallery
+                </a>
+                <a href="#services-section" class="bg-white text-blue-600 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-200 transition duration-300">
+                    Book Now
+                </a>
+            </div> 
+        </div>
+    </header>
+
+    
+        <!-- About Section -->
+  <section id="about-section" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row items-center">
+        <div class="md:w-1/3 mb-8 md:mb-0">
+       <img src="https://i.postimg.cc/4yqzttY8/profile.jpg" alt="Photographer Portrait" class="rounded-full w-64 h-64 object-cover mx-auto shadow-xl border-4 border-white">
+        </div>
+        </div>
+        <div class="md:w-2/3 md:pl-12">
+          <h2 class="text-3xl font-bold mb-6">About Qonki Grapher</h2>
+          <h2 class="text-3xl font-bold mb-6">Capturing life with heart, lens, and vision.</h2>
+          <p class="text-lg text-gray-700 mb-6 leading-relaxed">
+           Hi, I’m Qonki — the eye behind the camera and the storyteller behind every frame. For over a decade,
+            I’ve been turning fleeting moments into lasting memories through photography and videography. 
+           Whether it’s a wedding, birthday, or milestone event, I believe every occasion deserves to be remembered with beauty and authenticity.
+          </p>
+          <p class="text-lg text-gray-700 mb-8 leading-relaxed">
+           My style blends candid emotion with artistic direction, creating images that feel natural yet cinematic. 
+           I don’t just take pictures — I preserve the feeling, the energy, and the story behind them.
+          </p>
+          <p class="text-lg text-gray-700 mb-8 leading-relaxed">
+          In addition to personal events, I offer corporate photography and videography services, backed by six years of industry experience. 
+          From brand launches to team portraits, I help businesses tell their stories with clarity and impact.
+          </p>
+          <p class="text-lg text-gray-700 mb-8 leading-relaxed">
+           At Qonkigraphics Photography, it’s not just about the shot — it’s about the connection, the craft, and the care that goes into every project.
+          </p>
+          <div class="flex space-x-6">
+            <div>
+              <p class="text-4xl font-bold text-indigo-600">500+</p>
+              <p class="text-gray-500">Happy Clients</p>
+            </div>
+            <div>
+              <p class="text-4xl font-bold text-indigo-600">250+</p>
+              <p class="text-gray-500">Events Covered</p>
+            </div>
+            <div>
+              <p class="text-4xl font-bold text-indigo-600">5+</p>
+              <p class="text-gray-500">Awards Won</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+      <div class="container mx-auto">  
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center text-gray-800 tracking-tight">
+            Photo Gallery
+        </h1>
+        <p class="text-center text-gray-600 mt-2 mb-8">Explore a selection of my favorite photographs across different specialties</p>
+
+        <!-- Filter Buttons Section -->
+        <div id="filter-container" class="flex flex-wrap justify-center gap-4 mb-8">
+            <button class="filter-button selected" data-category="all">All</button>
+            <button class="filter-button" data-category="wedding">Weddings</button>
+            <button class="filter-button" data-category="portraits">Portraits</button>
+            <button class="filter-button" data-category="events">Events</button>
+            <button class="filter-button" data-category="creative">Creative</button>
+        </div>
+
+        <!-- Dynamic Photo Grid -->
+        <div id="photo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Photos will be dynamically added here by JavaScript -->
+        </div>
+
+        <div id="services-section" class="my-16">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-2 tracking-tight">
+                Services & Packages
+            </h2>
+            <p class="text-center text-gray-600 mb-8">Professional photography services designed to your unique needs.</p>
+            <!--At Qonki Grapher, I offer a range of services designed to capture your story with clarity, emotion, and artistry. Whether you're celebrating a personal milestone or elevating your brand, 
+            I bring a thoughtful, professional touch to every frame.-->
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Service Card 1: Portrait Sessions -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col items-center p-6 text-center">
+                    <img src="https://i.postimg.cc/hjWCHXcr/w0006-1.png" alt="Portrait Photography" class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Portrait photography</h3>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">
+                        Professional headshots, personal branding, and lifestyle portraits to capture your unique personality.
+                    </p>
+                    <p class="text-lg font-bold text-blue-600">KSh.7,000 - KSh.10,000</p>
+                    <p class="text-xs text-gray-400 mb-4">(30% deposit required)</p>
+                    <button onclick="location.href='mainform.html'" 
+                     class="book-button bg-blue-600 text-white font-semibold py-3 px-6 rounded-full shadow-md hover:bg-blue-700 transition duration-300 w-full" 
+                    data-session-type="Portrait Photo">
+                       Book with Qonki
+                    </button>
+                </div>
+
+                <!-- Service Card 2: Weddings & Engagements -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col items-center p-6 text-center">
+                    <img src="https://i.postimg.cc/0NnfyM2S/s0001.jpg" alt="Wedding Photography" class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Weddings & Engagements</h3>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">
+                        Capturing the emotion and cherished moments of your special day with elegant and timeless photography.
+                    </p>
+                    <p class="text-lg font-bold text-blue-600">KSh.40,000 - KSh.50,000</p>
+                    <p class="text-xs text-gray-400 mb-4">(30% deposit required)</p>
+                    <button onclick="location.href='mainform.html'" 
+                     class="book-button bg-blue-600 text-white font-semibold py-3 px-6 rounded-full shadow-md hover:bg-blue-700 transition duration-300 w-full" 
+                    data-session-type="Portrait Photo">
+                       Book with Qonki
+                    </button>
+
+                </div>
+
+                <!-- Service Card 3: Corporate & Events -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col items-center p-6 text-center">
+                    <img src="https://i.postimg.cc/MHQ8tbFR/E20001.jpg" alt="Corporate & Events Photography" class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Corporate & Events</h3>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">
+                        Documenting corporate gatherings, conferences, and special events with professional, high-quality images.
+                    </p>
+                    <p class="text-lg font-bold text-blue-600">KSh.20,000 - KSh.30,000</p>
+                    <p class="text-xs text-gray-400 mb-4">(30% deposit required)</p>
+                    <button onclick="location.href='mainform.html'" 
+                     class="book-button bg-blue-600 text-white font-semibold py-3 px-6 rounded-full shadow-md hover:bg-blue-700 transition duration-300 w-full" 
+                    data-session-type="Portrait Photo">
+                       Book with Qonki
+                    </button>
+                </div>
+
+                <!-- Service Card 4: Creative Photography -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col items-center p-6 text-center">
+                    <img src="https://i.postimg.cc/hjn4XYyw/c30003.jpg" alt="Creative Photography" class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Creative Photography</h3>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">
+                        Collaborative projects, conceptual shoots, and unique artistic expressions tailored to your vision.
+                    </p>
+                    <p class="text-lg font-bold text-blue-600">KSh.10,000 - KSh.15,000</p>
+                    <p class="text-xs text-gray-400 mb-4">(30% deposit required)</p>
+                    <button onclick="location.href='mainform.html'" 
+                     class="book-button bg-blue-600 text-white font-semibold py-3 px-6 rounded-full shadow-md hover:bg-blue-700 transition duration-300 w-full" 
+                    data-session-type="Portrait Photo">
+                       Book with Qonki
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Client Testimonials Section -->
+        <div id="testimonials-section" class="my-16">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-2 tracking-tight">
+                Client Testimonials
+            </h2>
+            <p class="text-center text-gray-600 mt-2 mb-8">What my clients are saying about their experience</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Testimonial 1 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+                    <p class="text-gray-600 italic mb-4">"Qonki's work is simply breathtaking. Our wedding photos were beyond our wildest dreams. They captured every moment with such an artistic touch. Highly recommend!"</p>
+                    <div class="text-right text-blue-600 font-semibold">- Salma hamisi</div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+                    <p class="text-gray-600 italic mb-4">"The portrait photo was so comfortable and fun. Qonki has a way of making you feel at ease, and the final photos truly reflect my personality. Fantastic work!"</p>
+                    <div class="text-right text-blue-600 font-semibold">- John Smith</div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+                    <p class="text-gray-600 italic mb-4">"We hired Qonki for our corporate event, and the photos were excellent. They were professional, efficient, and delivered high-quality images that perfectly captured the energy of the day."</p>
+                    <div class="text-right text-blue-600 font-semibold">- Sarah Moh'a</div>
+                </div>
+                <!-- Testimonial 4 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+                    <p class="text-gray-600 italic mb-4">"My creative photography project came to life thanks to Qonki's vision and skill. The collaboration was seamless, and the results exceeded all expectations."</p>
+                    <div class="text-right text-blue-600 font-semibold">- Raya Yussuf</div>
+                </div>
+                <!-- Testimonial 5 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+                    <p class="text-gray-600 italic mb-4">"Working with Qonki on our engagement photos was a joy. They found the most beautiful locations and made us feel so relaxed. The pictures are stunning!"</p>
+                    <div class="text-right text-blue-600 font-semibold">- Emily Johnson</div>
+                </div>
+                <!-- Testimonial 6 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+                    <p class="text-gray-600 italic mb-4">"The photos from my recent headshot session are perfect. Qonki's attention to detail and ability to capture the right expression is truly remarkable. I'm so happy with the results!"</p>
+                    <div class="text-right text-blue-600 font-semibold">- Amina Brown</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Get in Touch & Socials Section -->
+        <div id="contact-section" class="my-16 text-center">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-800 mb-2 tracking-tight">
+                Get in Touch with Qonki Grapher
+            </h2>
+            <p class="text-center text-gray-600 mt-2 mb-8">Let's create something beautiful together. Connect with me directly or follow my work on social media.</p>
+            
+            <!-- Contact Info -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
+                <!-- Email -->
+                <div class="flex items-center gap-2">
+                    <a href="mailto:qonkigrapher@gmail.com" aria-label="Email">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    class="icon-hover text-red-500 fill-current">
+                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 
+                   2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 
+                   4-8 5-8-5V6l8 5 8-5v2Z"/>
+                 </svg>
+                 </a>
+                    <span class="text-gray-700">Email us</span>
+                </div>
+
+                
+
+                <!-- WhatsApp -->
+                <div class="flex items-center gap-2">
+                <a href="https://wa.me/c/254773341740" target="_blank" aria-label="WhatsApp">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                 alt="WhatsApp"
+                class="icon-hover" />
+                </a>
+                    <span class="text-gray-700">WhatsApp</span>
+                </div>
+                <!-- Location -->
+                <div class="flex items-center gap-2">
+                    <a href="https://maps.google.com" target="_blank" aria-label="Location">
+           <svg xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 24 24"
+           class="icon-hover text-blue-600 fill-current">
+           <path d="M12 2C8.13 2 5 5.13 5 
+                 9c0 5.25 7 13 7 13s7-7.75 
+                 7-13c0-3.87-3.13-7-7-7Zm0 
+                 9.5A2.5 2.5 0 1 1 12 
+                 6a2.5 2.5 0 0 1 0 5.5Z"/>
+      </svg>
+    </a>
+                    <span class="text-gray-700">Nairobi, Kenya</span>
+                </div>
+            </div>
+            
+            <!-- Social Media Icons -->
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Follow me</h3>
+            <div class="flex justify-center items-center gap-8">
+
+      <a href="https://www.instagram.com/ea_qonki_grapher?igsh=Y2Y5MmY1eXh5ajRz" target="_blank" aria-label="Instagram">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
+           alt="Instagram"
+           class="icon-hover rounded-full" />
+       </a>
+<!-- TikTok (Brand: #010101) -->
+      <a href="https://www.tiktok.com/@ea_qonki_grapher?_t=ZM-8zVgsncgreH&_r=1" target="_blank" aria-label="TikTok">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg"
+           alt="TikTok"
+           class="icon-hover"
+           style="filter: invert(7%) sepia(1%) saturate(8%) hue-rotate(345deg) brightness(93%) contrast(97%);" />
+      </a>
+ <!-- Facebook (Brand: #25D366) -->
+<a href="https://www.instagram.com/ea_qonki_grapher?igsh=Y2Y5MmY1eXh5ajRz" target="_blank" aria-label="Facebook">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
+       alt="Facebook"
+       class="icon-hover" />
+</a>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="bg-slate-950 text-slate-300 py-12 px-8">
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Column 1: Qonki Grapher & Socials -->
+            <div>
+                <h3 class="text-xl font-bold text-slate-100 mb-2">Qonki Grapher</h3>
+                <p class="text-sm">Capturing your special moments with creativity and passion since 2015.</p>
+                <div class="flex space-x-4 mt-4 text-slate-400">
+                    <a href="https://www.instagram.com/ea_qonki_grapher?igsh=Y2Y5MmY1eXh5ajRz" target="_blank" aria-label="Instagram">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
+           alt="Instagram"
+           class="icon-hover rounded-full" />
+       </a>
+<a href="https://www.tiktok.com/@ea_qonki_grapher?_t=ZM-8zVgsncgreH&_r=1" target="_blank" aria-label="TikTok">
+  <img src="https://cdn.jsdelivr.net/npm/simple-icons@v10/icons/tiktok.svg"
+       alt="TikTok"
+       class="icon-hover"
+       style="filter: brightness(0) invert(1);" />
+</a>
+
+
+
+
+                </div>
+            </div>
+
+            <!-- Column 2: Quick Links--> 
+           <div>
+                <h3 class="text-lg font-semibold text-slate-100 mb-2">Quick Links</h3>
+                <ul class="text-sm space-y-2">
+                    <li><a href="#photo-grid" class="hover:underline">Gallery</a></li>
+                    <li><a href="#services-section" class="hover:underline">Book Now</a></li>
+                </ul> 
+            </div>
+
+            
+
+            <!-- Column 3: Services--> 
+            <div>
+                <h3 class="text-lg font-semibold text-slate-100 mb-2">Inquiry</h3>
+                <ul class="text-sm space-y-2">
+                    <li><a href="inquiry.html" class="hover:underline">Message Us</a></li>
+                    <li><a href="inquiry.html" class="hover:underline">Connect with Us</a></li>
+                 
+                </ul>
+            </div>
+
+            <!-- Column 4: Contact -->
+            <div>
+                <h3 class="text-lg font-semibold text-slate-100 mb-2">Contact</h3>
+                <ul class="text-sm space-y-2">
+                    <li class="flex items-center space-x-2">
+                         <!-- Email -->
+                <div class="flex items-center gap-2">
+                    <a href="mailto:qonkigraper@gmail.com" aria-label="Email">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    class="icon-hover text-red-500 fill-current">
+                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 
+                   2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 
+                   4-8 5-8-5V6l8 5 8-5v2Z"/>
+                 </svg>
+                 </a>
+                    <span class="text-gray-700">qonkigrapher@gmail.com</span>
+                </div>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2.18A19.79 19.79 0 0 1 8.61 2.5a2.18 2.18 0 0 1 2.18-2.18h3a2 2 0 0 1 2 2v2.18a2 2 0 0 1-.3.84l-1.42 1.42a2 2 0 0 1-.82.52 16.56 16.56 0 0 0-2.32 2.32 2 2 0 0 1-.52.82l-1.42 1.42a2 2 0 0 1-.84.3H2.86a2 2 0 0 1-2-2.18z"></path>
+                        </svg>
+                        <span>(254) 714 859 186</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-map-pin">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span>254 Photo Street, Nairobi_kenya, Mombasa_kenya </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="container mx-auto mt-8 border-t border-slate-700 pt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500">
+            <p>&copy; 2025 All Rights  Reserved. Designed by @swae_saleh.</p>
+            <div class="flex space-x-4 mt-4 sm:mt-0">
+                <p> Privacy Policy</p>
+                <p> Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
